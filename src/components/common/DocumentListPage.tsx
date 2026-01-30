@@ -286,8 +286,10 @@ export function DocumentListPage({ pageTitle, role, initialDocuments }: Document
     }
   };
 
-  const handleDocumentExport = (documentId: string) => {
-    alert(`Xuất tài liệu ${documentId}`);
+  const handleDocumentSubmit = (documentId: string) => {
+    // In real app, call API to submit document to supervisor
+    alert(`Nộp tài liệu ${documentId} lên cấp trên thành công!`);
+    // Optionally update document status to 'pending'
   };
 
   const handleDocumentApprove = (documentId: string) => {
@@ -426,7 +428,7 @@ export function DocumentListPage({ pageTitle, role, initialDocuments }: Document
                           onView={handleView}
                           onEdit={handleEdit}
                           onDelete={handleDocumentDelete}
-                          onExport={handleDocumentExport}
+                          onSubmit={handleDocumentSubmit}
                         />
                       )}
                     </td>

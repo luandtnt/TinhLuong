@@ -5,10 +5,10 @@ interface SubordinateTableActionsCellProps {
   onView?: (documentId: string) => void;
   onEdit?: (documentId: string) => void;
   onDelete?: (documentId: string) => void;
-  onExport?: (documentId: string) => void;
+  onSubmit?: (documentId: string) => void;
 }
 
-function MiExport() {
+function MiSubmit() {
   return (
     <div className="relative shrink-0 size-[24px]">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
@@ -62,11 +62,11 @@ export function SubordinateTableActionsCell({
   onView,
   onEdit,
   onDelete,
-  onExport
+  onSubmit
 }: SubordinateTableActionsCellProps) {
-  const handleExport = (e: React.MouseEvent) => {
+  const handleSubmit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onExport?.(documentId);
+    onSubmit?.(documentId);
   };
 
   const handleView = (e: React.MouseEvent) => {
@@ -87,11 +87,11 @@ export function SubordinateTableActionsCell({
   return (
     <div className="flex gap-[8px] items-center justify-center">
       <button
-        onClick={handleExport}
+        onClick={handleSubmit}
         className="bg-white p-[2px] rounded-[4px] hover:bg-gray-100 transition-colors"
-        title="Xuất tài liệu"
+        title="Nộp lên cấp trên"
       >
-        <MiExport />
+        <MiSubmit />
       </button>
       <button
         onClick={handleView}
