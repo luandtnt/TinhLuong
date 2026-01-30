@@ -135,4 +135,8 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  {
+    path: "*",
+    element: <Navigate to="/role-selection" replace />,
+  },
 ]);
