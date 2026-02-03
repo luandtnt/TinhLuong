@@ -24,6 +24,14 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     return null;
   });
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    // Mark as initialized after first render
+    setIsInitialized(true);
+    console.log('✨ RoleProvider: Initialized with role:', role);
+  }, []);
+
   // Custom setRole that also saves to localStorage
   const setRole = (newRole: UserRole) => {
     console.log('📝 RoleProvider: Setting role to:', newRole);
@@ -36,6 +44,11 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('userRole', newRole);
     }
   };
+
+  // Don't render children until initialized
+  if (!isInitialized) {
+    return null;
+  }
 
   return (
     <RoleContext.Provider value={{ role, setRole }}>
