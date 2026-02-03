@@ -1,10 +1,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { MockUser } from '../data/mockUsers';
 
 export type UserRole = 'supervisor' | 'subordinate' | null;
 
 interface RoleContextType {
   role: UserRole;
+  user: MockUser | null;
   setRole: (role: UserRole) => void;
+  setUser: (user: MockUser | null) => void;
+  logout: () => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -24,12 +28,25 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     return null;
   });
 
+  // Initialize user from localStorage
+  const [user, setUserState] = useState<MockUser | null>(() => {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      try {
+        return JSON.parse(savedUser);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     // Mark as initialized after first render
     setIsInitialized(true);
-    console.log('✨ RoleProvider: Initialized with role:', role);
+    console.log('✨ RoleProvider: Initialized with role:', role, 'user:', user?.username);
   }, []);
 
   // Custom setRole that also saves to localStorage
@@ -45,13 +62,35 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Custom setUser that also saves to localStorage
+  const setUser = (newUser: MockUser | null) => {
+    console.log('📝 RoleProvider: Setting user to:', newUser?.username);
+    setUserState(newUser);
+    if (newUser === null) {
+      localStorage.removeItem('currentUser');
+    } else {
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
+      // Also set role based on user
+      setRole(newUser.role);
+    }
+  };
+
+  // Logout function
+  const logout = () => {
+    console.log('👋 RoleProvider: Logging out');
+    setRoleState(null);
+    setUserState(null);
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('currentUser');
+  };
+
   // Don't render children until initialized
   if (!isInitialized) {
     return null;
   }
 
   return (
-    <RoleContext.Provider value={{ role, setRole }}>
+    <RoleContext.Provider value={{ role, user, setRole, setUser, logout }}>
       {children}
     </RoleContext.Provider>
   );

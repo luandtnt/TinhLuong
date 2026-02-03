@@ -11,10 +11,10 @@ export function Header({ onMenuClick }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationCount = 3; // Example notification count
-  const { setRole } = useRole();
+  const { user, logout } = useRole();
 
   const handleLogout = () => {
-    setRole(null);
+    logout();
     setShowUserMenu(false);
   };
 
@@ -106,7 +106,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center backdrop-blur-sm">
               <User size={18} />
             </div>
-            <span className="text-[14px] font-medium hidden sm:inline">Admin</span>
+            <span className="text-[14px] font-medium hidden sm:inline">{user?.fullName || 'Admin'}</span>
             <ChevronDown size={16} className={`hidden sm:inline transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
           </button>
 
@@ -114,8 +114,9 @@ export function Header({ onMenuClick }: HeaderProps) {
           {showUserMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50 overflow-hidden">
               <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-red-50">
-                <p className="font-semibold text-gray-800">Admin</p>
-                <p className="text-xs text-gray-500">admin@example.com</p>
+                <p className="font-semibold text-gray-800">{user?.fullName || 'Admin'}</p>
+                <p className="text-xs text-gray-500">{user?.email || 'admin@example.com'}</p>
+                <p className="text-xs text-gray-400 mt-1">{user?.organization || ''}</p>
               </div>
               <div className="py-2">
                 <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">

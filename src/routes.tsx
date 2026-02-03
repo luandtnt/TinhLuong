@@ -18,7 +18,7 @@ import { SubordinatePartyCongressPage } from "./pages/documents/SubordinateParty
 import { CentralCommitteeMeetingPage } from "./pages/documents/CentralCommitteeMeetingPage";
 import { SubordinateCentralCommitteeMeetingPage } from "./pages/documents/SubordinateCentralCommitteeMeetingPage";
 import { AddDocumentPage } from "./pages/documents/AddDocumentPage";
-import { RoleSelectionPage } from "./pages/RoleSelectionPage";
+import { LoginPage } from "./pages/LoginPage";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 import { RoleBasedRoute } from "./components/layout/RoleBasedRoute";
 import { ReviewListPage } from "./pages/reviews/ReviewListPage";
@@ -28,11 +28,11 @@ import { ReportsPage } from "./pages/reports/ReportsPage";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Navigate to="/role-selection" replace />,
+    element: <Navigate to="/login" replace />,
   },
   {
-    path: "/role-selection",
-    Component: RoleSelectionPage,
+    path: "/login",
+    Component: LoginPage,
   },
   {
     path: "/dashboard",

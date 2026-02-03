@@ -14,15 +14,15 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   console.log('🛡️ ProtectedRoute: Current role:', role, 'Path:', location.pathname);
 
   useEffect(() => {
-    // If no role is selected and not on role selection page, redirect to role selection
-    if (!role && location.pathname !== '/role-selection') {
-      console.log('⚠️ ProtectedRoute: No role found, redirecting to role selection');
-      navigate('/role-selection');
+    // If no role is selected and not on login page, redirect to login
+    if (!role && location.pathname !== '/login') {
+      console.log('⚠️ ProtectedRoute: No role found, redirecting to login');
+      navigate('/login');
     }
   }, [role, navigate, location.pathname]);
 
   // If no role, don't render children (will redirect in useEffect)
-  if (!role && location.pathname !== '/role-selection') {
+  if (!role && location.pathname !== '/login') {
     return null;
   }
 
