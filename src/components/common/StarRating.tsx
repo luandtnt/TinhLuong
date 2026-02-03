@@ -17,8 +17,9 @@ export function StarRating({ rating, size = 16, showNumber = false }: StarRating
           key={star}
           size={size}
           style={{
-            fill: star <= roundedRating ? '#fbbf24' : '#e5e7eb',
-            color: star <= roundedRating ? '#fbbf24' : '#e5e7eb'
+            fill: star <= roundedRating ? '#FFC107' : '#e5e7eb',
+            color: star <= roundedRating ? '#FFC107' : '#e5e7eb',
+            stroke: star <= roundedRating ? '#FFC107' : '#e5e7eb'
           }}
         />
       ))}

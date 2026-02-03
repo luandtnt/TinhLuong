@@ -17,11 +17,8 @@ export function RoleSelectionPage() {
         {/* Header */}
         <div className="text-center mb-[48px]">
           <h1 className="text-[32px] md:text-[40px] font-bold text-white mb-[12px] leading-tight">
-            Hệ thống Quản lý Tài liệu
+            Hệ thống CSDL Lý Luận Chính Trị
           </h1>
-          <p className="text-[18px] md:text-[20px] text-white/90">
-            Đảng bộ tỉnh Thừa Thiên Huế
-          </p>
         </div>
 
         {/* Role Selection Cards */}
@@ -84,7 +81,7 @@ export function RoleSelectionPage() {
         {/* Footer Info */}
         <div className="text-center">
           <p className="text-[14px] text-white/80">
-            Hệ thống quản lý tài liệu điện tử - Phiên bản 1.0
+            Hệ thống CSDL Lý Luận Chính Trị - Phiên bản 1.0
           </p>
         </div>
       </div>
