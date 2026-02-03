@@ -23,6 +23,13 @@ interface TableFilterRowProps {
   }>;
 }
 
+type FilterColumn = {
+  key: string;
+  type: 'text' | 'select' | 'date';
+  placeholder?: string;
+  options?: Array<{ value: string; label: string }>;
+};
+
 export function TableFilterRow({
   filters,
   onFilterChange,
@@ -34,7 +41,7 @@ export function TableFilterRow({
     onFilterChange({ ...filters, [key]: value });
   };
 
-  const renderFilterCell = (column: TableFilterRowProps['columns'][0]) => {
+  const renderFilterCell = (column: FilterColumn) => {
     if (!column) return null;
 
     switch (column.type) {

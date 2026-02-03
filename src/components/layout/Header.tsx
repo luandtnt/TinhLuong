@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Bell, RefreshCw, User, ChevronDown, Menu, LogOut, UserCircle, Settings } from 'lucide-react';
 import backgroundImage from '../../assets/nen.jpg';
+import { useRole } from '../../contexts/RoleContext';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -10,6 +11,16 @@ export function Header({ onMenuClick }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationCount = 3; // Example notification count
+  const { setRole } = useRole();
+
+  const handleLogout = () => {
+    setRole(null);
+    setShowUserMenu(false);
+  };
+
+  const handleRefresh = () => {
+    window.location.reload();
+  };
 
   return (
     <header
@@ -78,7 +89,11 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
 
         {/* Refresh Button */}
-        <button className="text-white hover:bg-white/10 transition-all p-2 rounded-lg" aria-label="Refresh">
+        <button 
+          onClick={handleRefresh}
+          className="text-white hover:bg-white/10 transition-all p-2 rounded-lg" 
+          aria-label="Refresh"
+        >
           <RefreshCw size={20} />
         </button>
 
@@ -112,7 +127,10 @@ export function Header({ onMenuClick }: HeaderProps) {
                   Cài đặt
                 </button>
                 <hr className="my-2" />
-                <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                <button 
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                >
                   <LogOut size={16} />
                   Đăng xuất
                 </button>

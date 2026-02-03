@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type UserRole = 'supervisor' | 'subordinate' | null;
 
@@ -10,7 +10,21 @@ interface RoleContextType {
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<UserRole>(null);
+  // Initialize role from localStorage
+  const [role, setRoleState] = useState<UserRole>(() => {
+    const savedRole = localStorage.getItem('userRole');
+    return (savedRole as UserRole) || null;
+  });
+
+  // Custom setRole that also saves to localStorage
+  const setRole = (newRole: UserRole) => {
+    setRoleState(newRole);
+    if (newRole === null) {
+      localStorage.removeItem('userRole');
+    } else {
+      localStorage.setItem('userRole', newRole);
+    }
+  };
 
   return (
     <RoleContext.Provider value={{ role, setRole }}>
