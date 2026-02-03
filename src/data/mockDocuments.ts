@@ -11,6 +11,8 @@ export interface ExtendedDocument {
   createdDate: string;
   status: 'approved' | 'draft' | 'pending' | 'rejected';
   uploadDate?: string;
+  uploader?: string;
+  uploaderOrg?: string;
   // Full content data for modals
   contentData: Partial<ContentFormData>;
 }
@@ -26,6 +28,8 @@ export const mockVanBanDocuments: ExtendedDocument[] = [
     author: 'Ban Chấp hành Trung ương',
     createdDate: '2025-01-15',
     uploadDate: '2025-01-20',
+    uploader: 'Nguyễn Văn A',
+    uploaderOrg: 'Văn phòng Trung ương Đảng',
     status: 'approved',
     contentData: {
       type: 'VAN_BAN',
@@ -33,10 +37,11 @@ export const mockVanBanDocuments: ExtendedDocument[] = [
         code: 'VB-20250130-001',
         title: 'Nghị quyết số 01/NQ-TW về tăng cường xây dựng Đảng',
         classification: 'CONG_KHAI',
-        authors: ['Ban Chấp hành Trung ương', 'Bộ Chính trị'],
-        summary: 'Nghị quyết đề ra các nhiệm vụ, giải pháp trọng tâm nhằm tăng cường xây dựng, chỉnh đốn Đảng; ngăn chặn, đẩy lùi sự suy thoái về tư tưởng chính trị, đạo đức, lối sống, những biểu hiện "tự diễn biến", "tự chuyển hóa" trong nội bộ.',
+        authors: ['Ban Chấp hành Trung ương'],
         language: 'Tiếng Việt',
-      },
+        summary: 'Nghị quyết đề ra các nhiệm vụ, giải pháp trọng tâm nhằm tăng cường xây dựng, chỉnh đốn Đảng; ngăn chặn, đẩy lùi sự suy thoái về tư tưởng chính trị, đạo đức, lối sống, những biểu hiện "tự diễn biến", "tự chuyển hóa" trong nội bộ.',
+        organization: 'Văn phòng Trung ương Đảng',
+      } as any,
       sourceMetadata: {
         sourceType: 'INTERNAL',
         internalCode: 'LT-2025-001',
@@ -71,6 +76,8 @@ export const mockVanBanDocuments: ExtendedDocument[] = [
     author: 'Bộ Chính trị',
     createdDate: '2025-01-10',
     uploadDate: '2025-01-15',
+    uploader: 'Trần Thị B',
+    uploaderOrg: 'Văn phòng Trung ương Đảng',
     status: 'pending',
     contentData: {
       type: 'VAN_BAN',
@@ -79,9 +86,10 @@ export const mockVanBanDocuments: ExtendedDocument[] = [
         title: 'Chỉ thị số 05-CT/TW về đẩy mạnh học tập và làm theo tư tưởng, đạo đức, phong cách Hồ Chí Minh',
         classification: 'CONG_KHAI',
         authors: ['Bộ Chính trị'],
-        summary: 'Chỉ thị nhằm tiếp tục đẩy mạnh việc học tập và làm theo tư tưởng, đạo đức, phong cách Hồ Chí Minh gắn với thực hiện Nghị quyết Trung ương 4 về xây dựng, chỉnh đốn Đảng.',
         language: 'Tiếng Việt',
-      },
+        summary: 'Chỉ thị nhằm tiếp tục đẩy mạnh việc học tập và làm theo tư tưởng, đạo đức, phong cách Hồ Chí Minh gắn với thực hiện Nghị quyết Trung ương 4 về xây dựng, chỉnh đốn Đảng.',
+        organization: 'Văn phòng Trung ương Đảng',
+      } as any,
       sourceMetadata: {
         sourceType: 'ONLINE',
         url: 'https://dangcongsan.vn/chi-thi-05-ct-tw',
@@ -105,51 +113,9 @@ export const mockVanBanDocuments: ExtendedDocument[] = [
       },
     },
   },
-  {
-    id: 'vb-003',
-    code: 'VB-20250125-003',
-    title: 'Kết luận số 21-KL/TW về tăng cường công tác phòng, chống tham nhũng',
-    type: 'Văn bản',
-    classification: 'Nội bộ',
-    author: 'Ban Chấp hành Trung ương',
-    createdDate: '2025-01-08',
-    status: 'draft',
-    contentData: {
-      type: 'VAN_BAN',
-      common: {
-        code: 'VB-20250125-003',
-        title: 'Kết luận số 21-KL/TW về tăng cường công tác phòng, chống tham nhũng',
-        classification: 'NOI_BO',
-        authors: ['Ban Chấp hành Trung ương'],
-        summary: 'Kết luận đánh giá tình hình và đề ra các giải pháp tăng cường công tác phòng, chống tham nhũng, tiêu cực trong giai đoạn mới.',
-        language: 'Tiếng Việt',
-      },
-      sourceMetadata: {
-        sourceType: 'INTERNAL',
-        internalCode: 'LT-2025-003',
-        providerOrg: 'Văn phòng Trung ương Đảng',
-        rights: 'NOI_BO',
-      },
-      specific: {
-        documentType: 'Kết luận',
-        issueDate: '2025-01-08',
-        issueYear: '2025',
-        documentNumber: '21-KL/TW',
-        issuer: 'Ban Chấp hành Trung ương',
-        issueLocation: 'Hà Nội',
-        effectiveStatus: 'CON_HIEU_LUC',
-      },
-      fileMetadata: {
-        fileName: 'ket-luan-21-kl-tw.pdf',
-        fileSize: 3245678,
-        fileFormat: 'PDF',
-        pageCount: 52,
-      },
-    },
-  },
 ];
 
-// Mock data for SACH (Sách)
+// Mock data for SACH (Sách) - Updated with new fields
 export const mockSachDocuments: ExtendedDocument[] = [
   {
     id: 'sach-001',
@@ -160,6 +126,8 @@ export const mockSachDocuments: ExtendedDocument[] = [
     author: 'Ban Chấp hành Trung ương',
     createdDate: '2024-12-20',
     uploadDate: '2025-01-05',
+    uploader: 'Lê Văn C',
+    uploaderOrg: 'Nhà xuất bản Chính trị Quốc gia',
     status: 'approved',
     contentData: {
       type: 'SACH',
@@ -167,10 +135,11 @@ export const mockSachDocuments: ExtendedDocument[] = [
         code: 'SACH-20250125-001',
         title: 'Lịch sử Đảng Cộng sản Việt Nam - Tập 1 (1930-1954)',
         classification: 'CONG_KHAI',
-        authors: ['Ban Chấp hành Trung ương', 'Viện Lịch sử Đảng'],
-        summary: 'Cuốn sách trình bày toàn diện, hệ thống lịch sử 24 năm đầu tiên của Đảng Cộng sản Việt Nam, từ khi thành lập (1930) đến khi giành được độc lập dân tộc (1954). Nội dung phản ánh quá trình lãnh đạo cách mạng Việt Nam của Đảng trong giai đoạn đầu tiên.',
+        authors: ['Ban Chấp hành Trung ương'],
         language: 'Tiếng Việt',
-      },
+        summary: 'Cuốn sách trình bày toàn diện, hệ thống lịch sử 24 năm đầu tiên của Đảng Cộng sản Việt Nam, từ khi thành lập (1930) đến khi giành được độc lập dân tộc (1954).',
+        organization: 'Nhà xuất bản Chính trị Quốc gia',
+      } as any,
       sourceMetadata: {
         sourceType: 'INTERNAL',
         internalCode: 'NXB-CTQG-2024-156',
@@ -179,12 +148,17 @@ export const mockSachDocuments: ExtendedDocument[] = [
         rightsNote: 'Bản quyền thuộc Nhà xuất bản Chính trị Quốc gia',
       },
       specific: {
+        chiefEditor: 'GS.TS Nguyễn Văn Linh',
+        compositionYear: '2023',
         publishYear: '2024',
         publisher: 'Nhà xuất bản Chính trị Quốc gia Sự thật',
-        edition: 'Tái bản lần thứ 3, có bổ sung',
-        isbn: '978-604-0-12345-6',
         publishLocation: 'Hà Nội',
+        reprintEdition: 'Lần 3',
+        edition: 'Tái bản có bổ sung',
+        isbn: '978-604-0-12345-6',
         hasTranslation: false,
+        editor: 'TS Trần Văn Nam',
+        editorialDepartment: 'Phòng Biên tập Lịch sử',
       },
       fileMetadata: {
         fileName: 'lich-su-dang-tap-1.pdf',
@@ -202,6 +176,9 @@ export const mockSachDocuments: ExtendedDocument[] = [
     classification: 'Nội bộ',
     author: 'PGS.TS Nguyễn Văn A',
     createdDate: '2024-12-15',
+    uploadDate: '2024-12-20',
+    uploader: 'Phạm Thị D',
+    uploaderOrg: 'Học viện Chính trị Quốc gia',
     status: 'draft',
     contentData: {
       type: 'SACH',
@@ -209,10 +186,11 @@ export const mockSachDocuments: ExtendedDocument[] = [
         code: 'SACH-20250120-002',
         title: 'Tư tưởng Hồ Chí Minh về xây dựng Đảng',
         classification: 'NOI_BO',
-        authors: ['PGS.TS Nguyễn Văn A', 'TS Trần Thị B'],
-        summary: 'Công trình nghiên cứu chuyên sâu về tư tưởng Hồ Chí Minh trong công tác xây dựng Đảng, từ lý luận đến thực tiễn. Sách phân tích các quan điểm cơ bản của Người về vai trò, vị trí, tính chất, nguyên tắc tổ chức và hoạt động của Đảng.',
+        authors: ['PGS.TS Nguyễn Văn A'],
         language: 'Tiếng Việt',
-      },
+        summary: 'Công trình nghiên cứu chuyên sâu về tư tưởng Hồ Chí Minh trong công tác xây dựng Đảng, từ lý luận đến thực tiễn.',
+        organization: 'Học viện Chính trị Quốc gia',
+      } as any,
       sourceMetadata: {
         sourceType: 'INTERNAL',
         internalCode: 'HV-CTQG-2024-089',
@@ -220,12 +198,18 @@ export const mockSachDocuments: ExtendedDocument[] = [
         rights: 'NOI_BO',
       },
       specific: {
+        chiefEditor: 'PGS.TS Lê Thị Mai',
+        compositionYear: '2023',
         publishYear: '2024',
         publisher: 'Nhà xuất bản Lý luận Chính trị',
+        publishLocation: 'Hà Nội',
         edition: 'Lần xuất bản thứ nhất',
         isbn: '978-604-0-23456-7',
-        publishLocation: 'Hà Nội',
-        hasTranslation: false,
+        hasTranslation: true,
+        translator: 'Dr. John Smith',
+        translatedLanguages: ['English', 'Français'],
+        editor: 'ThS Hoàng Văn Bình',
+        editorialDepartment: 'Phòng Biên tập Lý luận',
       },
       fileMetadata: {
         fileName: 'tu-tuong-hcm-xay-dung-dang.pdf',
@@ -235,51 +219,9 @@ export const mockSachDocuments: ExtendedDocument[] = [
       },
     },
   },
-  {
-    id: 'sach-003',
-    code: 'SACH-20250110-003',
-    title: 'Đảng Cộng sản Việt Nam - 95 năm lãnh đạo và phát triển',
-    type: 'Sách',
-    classification: 'Công khai',
-    author: 'Viện Lịch sử Đảng',
-    createdDate: '2024-12-01',
-    uploadDate: '2024-12-10',
-    status: 'rejected',
-    contentData: {
-      type: 'SACH',
-      common: {
-        code: 'SACH-20250110-003',
-        title: 'Đảng Cộng sản Việt Nam - 95 năm lãnh đạo và phát triển',
-        classification: 'CONG_KHAI',
-        authors: ['Viện Lịch sử Đảng', 'Học viện Chính trị Quốc gia'],
-        summary: 'Tác phẩm tổng hợp 95 năm lịch sử vẻ vang của Đảng Cộng sản Việt Nam, từ ngày thành lập đến nay, với những thành tựu to lớn trong sự nghiệp xây dựng và bảo vệ Tổ quốc.',
-        language: 'Tiếng Việt',
-      },
-      sourceMetadata: {
-        sourceType: 'INTERNAL',
-        internalCode: 'NXB-CTQG-2024-200',
-        providerOrg: 'Nhà xuất bản Chính trị Quốc gia Sự thật',
-        rights: 'CONG_KHAI',
-      },
-      specific: {
-        publishYear: '2024',
-        publisher: 'Nhà xuất bản Chính trị Quốc gia Sự thật',
-        edition: 'Lần xuất bản thứ nhất',
-        isbn: '978-604-0-34567-8',
-        publishLocation: 'Hà Nội',
-        hasTranslation: false,
-      },
-      fileMetadata: {
-        fileName: 'dang-95-nam.pdf',
-        fileSize: 12456789,
-        fileFormat: 'PDF',
-        pageCount: 512,
-      },
-    },
-  },
 ];
 
-// Mock data for AUDIO
+// Mock data for AUDIO - Updated with new fields
 export const mockAudioDocuments: ExtendedDocument[] = [
   {
     id: 'audio-001',
@@ -290,6 +232,8 @@ export const mockAudioDocuments: ExtendedDocument[] = [
     author: 'Tổng Bí thư',
     createdDate: '2025-01-18',
     uploadDate: '2025-01-20',
+    uploader: 'Vũ Văn E',
+    uploaderOrg: 'Văn phòng Trung ương Đảng',
     status: 'approved',
     contentData: {
       type: 'AUDIO',
@@ -297,10 +241,11 @@ export const mockAudioDocuments: ExtendedDocument[] = [
         code: 'AUDIO-20250122-001',
         title: 'Bài phát biểu của Tổng Bí thư tại Hội nghị Trung ương 8',
         classification: 'NOI_BO',
-        authors: ['Tổng Bí thư Nguyễn Phú Trọng'],
-        summary: 'Bài phát biểu quan trọng của Tổng Bí thư tại phiên khai mạc Hội nghị lần thứ 8 Ban Chấp hành Trung ương khóa XIII, đề cập đến các vấn đề trọng tâm về phát triển kinh tế-xã hội và xây dựng Đảng.',
+        authors: ['Tổng Bí thư'],
         language: 'Tiếng Việt',
-      },
+        summary: 'Bài phát biểu quan trọng của Tổng Bí thư tại phiên khai mạc Hội nghị lần thứ 8 Ban Chấp hành Trung ương khóa XIII.',
+        organization: 'Văn phòng Trung ương Đảng',
+      } as any,
       sourceMetadata: {
         sourceType: 'INTERNAL',
         internalCode: 'AUDIO-HNTW8-2025',
@@ -309,22 +254,26 @@ export const mockAudioDocuments: ExtendedDocument[] = [
         rightsNote: 'Chỉ phục vụ nghiên cứu nội bộ',
       },
       specific: {
+        presenter: 'Tổng Bí thư Nguyễn Phú Trọng',
         releaseDate: '2025-01-15',
         platform: 'Hệ thống nội bộ Đảng',
         programName: 'Hội nghị Trung ương 8',
+        episodeNumber: 'Phiên 1',
+        quality: '320kbps',
+        bandwidth: '320kbps',
         language: 'Tiếng Việt',
       },
       fileMetadata: {
         fileName: 'phat-bieu-tbt-hntw8.mp3',
         fileSize: 45678912,
         fileFormat: 'MP3',
-        duration: 3845, // seconds (64 phút)
+        duration: 3845,
       },
     },
   },
 ];
 
-// Mock data for VIDEO
+// Mock data for VIDEO - Updated with new fields
 export const mockVideoDocuments: ExtendedDocument[] = [
   {
     id: 'video-001',
@@ -335,6 +284,8 @@ export const mockVideoDocuments: ExtendedDocument[] = [
     author: 'Đài Truyền hình Việt Nam',
     createdDate: '2025-02-03',
     uploadDate: '2025-02-05',
+    uploader: 'Đỗ Thị F',
+    uploaderOrg: 'Đài Truyền hình Việt Nam',
     status: 'approved',
     contentData: {
       type: 'VIDEO',
@@ -343,9 +294,10 @@ export const mockVideoDocuments: ExtendedDocument[] = [
         title: 'Lễ kỷ niệm 95 năm Ngày thành lập Đảng Cộng sản Việt Nam',
         classification: 'CONG_KHAI',
         authors: ['Đài Truyền hình Việt Nam'],
-        summary: 'Chương trình đặc biệt ghi lại toàn cảnh Lễ kỷ niệm 95 năm Ngày thành lập Đảng Cộng sản Việt Nam (3/2/1930 - 3/2/2025), với sự tham dự của các đồng chí lãnh đạo Đảng, Nhà nước và đông đảo đại biểu.',
         language: 'Tiếng Việt',
-      },
+        summary: 'Chương trình đặc biệt ghi lại toàn cảnh Lễ kỷ niệm 95 năm Ngày thành lập Đảng Cộng sản Việt Nam (3/2/1930 - 3/2/2025).',
+        organization: 'Đài Truyền hình Việt Nam',
+      } as any,
       sourceMetadata: {
         sourceType: 'ONLINE',
         url: 'https://vtv.vn/le-ky-niem-95-nam-thanh-lap-dang',
@@ -354,24 +306,28 @@ export const mockVideoDocuments: ExtendedDocument[] = [
       },
       specific: {
         releaseDate: '2025-02-03',
-        platform: 'VTV1 - Đài Truyền hình Việt Nam',
-        channelName: 'VTV1',
+        director: 'Đạo diễn Nguyễn Hữ Tài',
+        productionCompany: 'Đài Truyền hình Việt Nam',
+        platform: 'VTV1',
+        channelName: 'VTV1 - Đài Truyền hình Việt Nam',
+        videoFormat: '1080p',
         eventName: 'Lễ kỷ niệm 95 năm Ngày thành lập Đảng',
         location: 'Nhà hát Lớn Hà Nội',
+        screenplay: 'Kịch bản: Tập thể biên tập VTV. Chương trình gồm các phần: Lễ chào cờ, phát biểu của lãnh đạo Đảng, văn nghệ chào mừng.',
         language: 'Tiếng Việt',
       },
       fileMetadata: {
         fileName: 'le-ky-niem-95-nam-dang.mp4',
         fileSize: 1258291200,
         fileFormat: 'MP4',
-        duration: 7200, // 2 giờ
+        duration: 7200,
         resolution: '1920x1080',
       },
     },
   },
 ];
 
-// Mock data for HINH_ANH
+// Mock data for HINH_ANH - Updated with new fields
 export const mockHinhAnhDocuments: ExtendedDocument[] = [
   {
     id: 'img-001',
@@ -379,9 +335,11 @@ export const mockHinhAnhDocuments: ExtendedDocument[] = [
     title: 'Bác Hồ với đồng bào dân tộc thiểu số',
     type: 'Hình ảnh',
     classification: 'Công khai',
-    author: 'Bảo tàng Hồ Chí Minh',
+    author: 'Nhiếp ảnh gia Trần Hồng',
     createdDate: '1960-05-19',
     uploadDate: '2025-01-10',
+    uploader: 'Ngô Văn G',
+    uploaderOrg: 'Bảo tàng Hồ Chí Minh',
     status: 'approved',
     contentData: {
       type: 'HINH_ANH',
@@ -390,9 +348,10 @@ export const mockHinhAnhDocuments: ExtendedDocument[] = [
         title: 'Bác Hồ với đồng bào dân tộc thiểu số',
         classification: 'CONG_KHAI',
         authors: ['Nhiếp ảnh gia Trần Hồng'],
-        summary: 'Bức ảnh lịch sử ghi lại khoảnh khắc Chủ tịch Hồ Chí Minh thăm và trò chuyện với đồng bào dân tộc thiểu số tại Tây Bắc năm 1960.',
         language: 'Tiếng Việt',
-      },
+        summary: 'Bức ảnh lịch sử ghi lại khoảnh khắc Chủ tịch Hồ Chí Minh thăm và trò chuyện với đồng bào dân tộc thiểu số tại Tây Bắc năm 1960.',
+        organization: 'Bảo tàng Hồ Chí Minh',
+      } as any,
       sourceMetadata: {
         sourceType: 'INTERNAL',
         internalCode: 'BTG-HCM-1960-156',
@@ -401,10 +360,11 @@ export const mockHinhAnhDocuments: ExtendedDocument[] = [
         rightsNote: 'Được phép sử dụng cho mục đích giáo dục và nghiên cứu',
       },
       specific: {
-        creationDate: '1960-05-19',
+        photographer: 'Nhiếp ảnh gia Trần Hồng',
+        captureDate: '1960-05-19',
+        location: 'Tây Bắc, Việt Nam',
         imageType: 'Ảnh chụp',
-        caption: 'Chủ tịch Hồ Chí Minh thăm đồng bào dân tộc thiểu số',
-        altText: 'Bác Hồ đang ngồi trò chuyện cùng các đồng bào dân tộc thiểu số trong trang phục truyền thống, không khí thân mật và ấm áp',
+        caption: 'Chủ tịch Hồ Chí Minh thăm đồng bào dân tộc thiểu số. Bác Hồ đang ngồi trò chuyện cùng các đồng bào trong trang phục truyền thống, không khí thân mật và ấm áp.',
         collection: 'Bộ sưu tập ảnh lịch sử Hồ Chí Minh',
       },
       fileMetadata: {

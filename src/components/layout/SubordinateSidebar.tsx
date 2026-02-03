@@ -40,7 +40,6 @@ export function SubordinateSidebar({ onClose }: SubordinateSidebarProps) {
   ];
 
   const menuSections = [
-    { label: 'BÁO CÁO, THỐNG KÊ', path: '#' },
     { label: 'TRA CỨU', path: '#' },
     { label: 'SOẠN THẢO VĂN BẢN', path: '#' },
     { label: 'TÓM TẮT VĂN BẢN', path: '#' },

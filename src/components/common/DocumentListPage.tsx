@@ -36,7 +36,7 @@ interface DocumentListPageProps {
 function SubordinateStatusBadge({ status }: { status: Document['status'] }) {
   const statusConfig = {
     approved: { label: 'Đã phê duyệt', bg: '#dcfce7', text: '#15803d' },
-    draft: { label: 'Nhập', bg: '#f3f4f6', text: '#6b7280' },
+    draft: { label: 'Nháp', bg: '#f3f4f6', text: '#6b7280' },
     pending: { label: 'Chờ phê duyệt', bg: '#fef3c7', text: '#b45309' },
     rejected: { label: 'Từ chối', bg: '#fee2e2', text: '#b91c1c' },
   };
@@ -122,7 +122,7 @@ export function DocumentListPage({ pageTitle, role, initialDocuments }: Document
           ]
         : [
             { value: 'approved', label: 'Đã phê duyệt' },
-            { value: 'draft', label: 'Nhập' },
+            { value: 'draft', label: 'Nháp' },
             { value: 'pending', label: 'Chờ phê duyệt' },
             { value: 'rejected', label: 'Từ chối' }
           ]

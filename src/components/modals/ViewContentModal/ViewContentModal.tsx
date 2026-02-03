@@ -6,7 +6,7 @@ import { formatFileSize, formatDuration } from '../../../utils/fileMeta';
 interface ViewContentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  data: Partial<ContentFormData>;
+  data: Partial<ContentFormData> & { status?: 'approved' | 'draft' | 'pending' | 'rejected' };
   onApprove?: () => void;
   onReject?: () => void;
   onCancel?: () => void;
@@ -120,14 +120,9 @@ export function ViewContentModal({
                 <ReadOnlyField label="Mã nội dung" value={common.code} required />
                 <ReadOnlyField label="Tên nội dung" value={common.title} required />
                 <ReadOnlyField label="Độ mật" value={common.classification ? classificationLabels[common.classification] : undefined} required />
-                <div className="col-span-3">
-                  <ReadOnlyField 
-                    label="Tác giả" 
-                    value={common.authors?.join(', ')} 
-                    required 
-                  />
-                </div>
-                <ReadOnlyField label="Ngôn ngữ" value={common.language} />
+                <ReadOnlyField label="Trạng thái" value={data.status === 'approved' ? 'Đã phê duyệt' : data.status === 'pending' ? 'Chờ phê duyệt' : data.status === 'rejected' ? 'Từ chối' : 'Nháp'} />
+                <ReadOnlyField label="Đơn vị người tải lên" value={(data as any).uploaderOrg} />
+                <ReadOnlyField label="Người tải lên" value={(data as any).uploader} />
               </div>
             </div>
 
@@ -143,10 +138,18 @@ export function ViewContentModal({
                   <ReadOnlyField label="Số hiệu/Ký hiệu" value={(specific as any).documentNumber} />
                   <ReadOnlyField label="Cơ quan ban hành" value={(specific as any).issuer} />
                   <ReadOnlyField label="Nơi ban hành" value={(specific as any).issueLocation} />
-                  <ReadOnlyField label="Tình trạng hiệu lực" value={(specific as any).effectiveStatus} />
+                  <ReadOnlyField label="Tình trạng hiệu lực" value={(specific as any).effectiveStatus === 'CON_HIEU_LUC' ? 'Còn hiệu lực' : (specific as any).effectiveStatus === 'DA_THAY_THE' ? 'Đã thay thế' : (specific as any).effectiveStatus === 'BAI_BO' ? 'Bãi bỏ' : undefined} />
                   <div className="col-span-3">
                     <ReadOnlyField label="Văn bản liên quan" value={(specific as any).relatedDocuments} />
                   </div>
+                  <div className="col-span-3">
+                    <ReadOnlyField 
+                      label="Tác giả" 
+                      value={common.authors?.join(', ')} 
+                      required 
+                    />
+                  </div>
+                  <ReadOnlyField label="Ngôn ngữ" value={common.language} />
                 </div>
               </div>
             )}
@@ -157,18 +160,26 @@ export function ViewContentModal({
                   Thông tin sách
                 </h4>
                 <div className="grid grid-cols-3 gap-[16px]">
+                  <div className="col-span-3">
+                    <ReadOnlyField 
+                      label="Tác giả" 
+                      value={common.authors?.join(', ')} 
+                      required 
+                    />
+                  </div>
+                  <ReadOnlyField label="Chủ biên" value={(specific as any).chiefEditor} />
+                  <ReadOnlyField label="Năm sáng tác" value={(specific as any).compositionYear} />
                   <ReadOnlyField label="Năm xuất bản" value={(specific as any).publishYear} required />
                   <ReadOnlyField label="Nhà xuất bản" value={(specific as any).publisher} required />
+                  <ReadOnlyField label="Nơi xuất bản" value={(specific as any).publishLocation} />
+                  <ReadOnlyField label="Lần tái bản" value={(specific as any).reprintEdition} />
                   <ReadOnlyField label="Ấn bản" value={(specific as any).edition} />
                   <ReadOnlyField label="ISBN" value={(specific as any).isbn} />
-                  <ReadOnlyField label="Nơi xuất bản" value={(specific as any).publishLocation} />
-                  {(specific as any).hasTranslation && (
-                    <>
-                      <ReadOnlyField label="Người dịch" value={(specific as any).translator} />
-                      <ReadOnlyField label="Ngôn ngữ gốc" value={(specific as any).originalLanguage} />
-                      <ReadOnlyField label="Ngôn ngữ dịch" value={(specific as any).translatedLanguage} />
-                    </>
-                  )}
+                  <ReadOnlyField label="Ngôn ngữ phát hành" value={common.language} />
+                  <ReadOnlyField label="Người dịch" value={(specific as any).translator} />
+                  <ReadOnlyField label="Ngôn ngữ được phiên dịch" value={(specific as any).translatedLanguages?.join(', ')} />
+                  <ReadOnlyField label="Biên tập viên" value={(specific as any).editor} />
+                  <ReadOnlyField label="Bộ phận biên tập" value={(specific as any).editorialDepartment} />
                 </div>
               </div>
             )}
@@ -179,10 +190,13 @@ export function ViewContentModal({
                   Thông tin audio
                 </h4>
                 <div className="grid grid-cols-3 gap-[16px]">
+                  <ReadOnlyField label="Người trình bày" value={(specific as any).presenter} />
                   <ReadOnlyField label="Ngày phát hành" value={(specific as any).releaseDate} required />
                   <ReadOnlyField label="Đơn vị phát hành" value={(specific as any).platform} required />
                   <ReadOnlyField label="Tên chương trình" value={(specific as any).programName} />
                   <ReadOnlyField label="Số tập" value={(specific as any).episodeNumber} />
+                  <ReadOnlyField label="Chất lượng" value={(specific as any).quality} />
+                  <ReadOnlyField label="Băng gỡ" value={(specific as any).bandwidth} />
                   <ReadOnlyField label="Ngôn ngữ" value={(specific as any).language} />
                 </div>
               </div>
@@ -195,11 +209,17 @@ export function ViewContentModal({
                 </h4>
                 <div className="grid grid-cols-3 gap-[16px]">
                   <ReadOnlyField label="Ngày phát hành" value={(specific as any).releaseDate} required />
+                  <ReadOnlyField label="Đạo diễn" value={(specific as any).director} />
+                  <ReadOnlyField label="Hãng sản xuất" value={(specific as any).productionCompany} />
                   <ReadOnlyField label="Nền tảng" value={(specific as any).platform} required />
                   <ReadOnlyField label="Tên kênh" value={(specific as any).channelName} />
+                  <ReadOnlyField label="Định dạng hình ảnh" value={(specific as any).videoFormat} />
                   <ReadOnlyField label="Sự kiện" value={(specific as any).eventName} />
                   <ReadOnlyField label="Địa điểm" value={(specific as any).location} />
                   <ReadOnlyField label="Ngôn ngữ" value={(specific as any).language} />
+                  <div className="col-span-3">
+                    <ReadOnlyField label="Kịch bản" value={(specific as any).screenplay} />
+                  </div>
                 </div>
               </div>
             )}
@@ -210,13 +230,14 @@ export function ViewContentModal({
                   Thông tin hình ảnh
                 </h4>
                 <div className="grid grid-cols-3 gap-[16px]">
-                  <ReadOnlyField label="Ngày tạo" value={(specific as any).creationDate} required />
-                  <ReadOnlyField label="Loại hình ảnh" value={(specific as any).imageType} required />
-                  <ReadOnlyField label="Chú thích ảnh" value={(specific as any).caption} />
+                  <ReadOnlyField label="Tác giả ảnh" value={(specific as any).photographer} />
+                  <ReadOnlyField label="Thời gian chụp" value={(specific as any).captureDate} />
+                  <ReadOnlyField label="Địa điểm" value={(specific as any).location} />
+                  <ReadOnlyField label="Loại hình ảnh" value={(specific as any).imageType} />
+                  <ReadOnlyField label="Tên bộ sưu tập" value={(specific as any).collection} />
                   <div className="col-span-3">
-                    <ReadOnlyField label="Mô tả ảnh" value={(specific as any).altText} />
+                    <ReadOnlyField label="Chú thích ảnh" value={(specific as any).caption} />
                   </div>
-                  <ReadOnlyField label="Bộ sưu tập" value={(specific as any).collection} />
                 </div>
               </div>
             )}
