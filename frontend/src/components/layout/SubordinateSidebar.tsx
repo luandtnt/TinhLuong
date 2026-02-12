@@ -27,6 +27,7 @@ const IconArrowDown = ({ isOpen }: { isOpen: boolean }) => (
 export function SubordinateSidebar({ onClose }: SubordinateSidebarProps) {
   const location = useLocation();
   const [isDocumentManagementOpen, setIsDocumentManagementOpen] = useState(true);
+  const [isPayrollOpen, setIsPayrollOpen] = useState(true);
 
   const documentLinks = [
     { path: '/dashboard/historical-documents', label: 'Tài liệu Lịch sử Đảng' },
@@ -37,6 +38,15 @@ export function SubordinateSidebar({ onClose }: SubordinateSidebarProps) {
     { path: '/dashboard/party-documents-intro', label: 'Giới thiệu văn kiện Đảng' },
     { path: '/dashboard/party-congress', label: 'Văn kiện Đại hội Đảng' },
     { path: '/dashboard/central-committee-meeting', label: 'Hội nghị BCH Trung ương' },
+  ];
+
+  const payrollLinks = [
+    { path: '/dashboard/payroll/timesheets', label: 'Tổng hợp chấm công - nghỉ - OT' },
+    { path: '/dashboard/payroll/periods', label: 'Tính lương' },
+    { path: '/dashboard/payroll/ot', label: 'OT/Làm thêm giờ - làm đêm' },
+    { path: '/dashboard/payroll/clawbacks', label: 'Truy thu lương' },
+    { path: '/dashboard/payroll/reports', label: 'Báo cáo lương' },
+    { path: '/dashboard/payroll/configs', label: 'Thiết lập tham số lương' },
   ];
 
   const menuSections = [
@@ -135,6 +145,52 @@ export function SubordinateSidebar({ onClose }: SubordinateSidebarProps) {
               </div>
             </div>
           ))}
+
+          {/* QUẢN LÝ LƯƠNG Section */}
+          <div className="relative shrink-0 w-full">
+            <div className="content-stretch flex flex-col items-start px-[10px] relative w-full">
+              <button
+                onClick={() => setIsPayrollOpen(!isPayrollOpen)}
+                className="h-[46px] relative rounded-[8px] shrink-0 w-full hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex flex-row items-center size-full">
+                  <div className="content-stretch flex gap-[6px] items-center px-[10px] py-[12px] relative size-full">
+                    <IconDocument />
+                    <p className="flex-[1_0_0] font-['Inter',sans-serif] font-medium leading-[20px] min-h-px min-w-px not-italic relative text-[#111827] text-[14px] whitespace-pre-wrap">QUẢN LÝ LƯƠNG</p>
+                    <IconArrowDown isOpen={isPayrollOpen} />
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Payroll Links */}
+          {isPayrollOpen && (
+            <>
+              {payrollLinks.map((link) => (
+                <div key={link.path} className="relative shrink-0 w-full">
+                  <div className="content-stretch flex flex-col items-start px-[10px] relative w-full">
+                    <Link
+                      to={link.path}
+                      className={`relative rounded-[8px] shrink-0 w-full transition-colors ${
+                        isActive(link.path) ? 'bg-[#b9000e]' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex flex-row items-center size-full">
+                        <div className="content-stretch flex items-center px-[40px] py-[12px] relative w-full">
+                          <div className={`flex flex-col font-['Inter',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[14px] ${
+                            isActive(link.path) ? 'text-white' : 'text-[#111827]'
+                          }`}>
+                            <p className="leading-[20px] whitespace-pre-wrap">{link.label}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </aside>

@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: payroll-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: payroll_user
+      POSTGRES_PASSWORD: payroll_pass
+      POSTGRES_DB: payroll_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - payroll-network
+
+  # Backend sẽ chạy local, không cần container
+  # Chỉ cần postgres trong Docker
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  payroll-network:
+    driver: bridge

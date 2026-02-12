@@ -1,0 +1,235 @@
+import { Controller, Get, Post, Param, Body, Patch, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiConsumes } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { PayrollService } from './payroll.service';
+import { PayrollReportService } from './payroll-report.service';
+import { AccountingService } from './accounting.service';
+import { AuditLogService } from './audit-log.service';
+import { ImportService } from './import.service';
+
+@ApiTags('payroll')
+@Controller('payroll')
+export class PayrollController {
+  constructor(
+    private readonly payrollService: PayrollService,
+    private readonly reportService: PayrollReportService,
+    private readonly accountingService: AccountingService,
+    private readonly auditLogService: AuditLogService,
+    private readonly importService: ImportService,
+  ) {}
+
+  @Get('periods')
+  @ApiOperation({ summary: 'Lấy danh sách kỳ lương' })
+  findAllPeriods() {
+    return this.payrollService.findAllPeriods();
+  }
+
+  @Get('periods/:id/details')
+  @ApiOperation({ summary: 'Lấy chi tiết bảng lương của kỳ' })
+  @ApiParam({ name: 'id', description: 'ID kỳ lương' })
+  getPayrollDetails(@Param('id') id: string) {
+    return this.payrollService.getPayrollDetails(id);
+  }
+
+  @Post('periods/:id/calculate')
+  @ApiOperation({ summary: 'Tính lương cho kỳ' })
+  @ApiParam({ name: 'id', description: 'ID kỳ lương' })
+  calculatePayroll(@Param('id') id: string) {
+    return this.payrollService.calculatePayroll(id);
+  }
+
+  @Post('periods/:id/submit')
+  @ApiOperation({ summary: 'Nộp duyệt kỳ lương' })
+  @ApiParam({ name: 'id', description: 'ID kỳ lương' })
+  submitPayroll(@Param('id') id: string) {
+    return this.payrollService.submitPayroll(id);
+  }
+
+  @Post('periods/:id/approve')
+  @ApiOperation({ summary: 'Phê duyệt kỳ lương' })
+  @ApiParam({ name: 'id', description: 'ID kỳ lương' })
+  approvePayroll(@Param('id') id: string) {
+    return this.payrollService.approvePayroll(id);
+  }
+
+  @Post('periods/:id/close')
+  @ApiOperation({ summary: 'Chốt kỳ lương (tạo snapshot)' })
+  @ApiParam({ name: 'id', description: 'ID kỳ lương' })
+  closePayroll(@Param('id') id: string) {
+    return this.payrollService.closePayroll(id);
+  }
+
+  @Patch('details/:id/adjust')
+  @ApiOperation({ summary: 'Điều chỉnh lương thủ công' })
+  @ApiParam({ name: 'id', description: 'ID chi tiết lương' })
+  adjustPayroll(
+    @Param('id') id: string,
+    @Body() adjustmentDto: { bonuses: Record<string, number>; deductions: Record<string, number>; note: string },
+  ) {
+    return this.payrollService.adjustPayroll(id, adjustmentDto);
+  }
+
+  @Get('details/:id')
+  @ApiOperation({ summary: 'Lấy chi tiết lương của một nhân viên' })
+  @ApiParam({ name: 'id', description: 'ID chi tiết lương' })
+  getPayrollDetail(@Param('id') id: string) {
+    return this.payrollService.getPayrollDetail(id);
+  }
+
+  @Get('periods/:id/reports/by-department')
+  @ApiOperation({ summary: 'Báo cáo lương theo phòng ban' })
+  @ApiParam({ name: 'id', description: 'ID kỳ lương' })
+  getReportByDepartment(@Param('id') id: string) {
+    return this.payrollService.getReportByDepartment(id);
+  }
+
+  @Get('reports/comparison')
+  @ApiOperation({ summary: 'Báo cáo so sánh giữa 2 kỳ lương' })
+  getComparisonReport(@Body() body: { period1Id: string; period2Id: string }) {
+    return this.payrollService.getComparisonReport(body.period1Id, body.period2Id);
+  }
+
+  @Get('periods/:id/reports/tax')
+  @ApiOperation({ summary: 'Báo cáo thuế TNCN' })
+  @ApiParam({ name: 'id', description: 'ID kỳ lương' })
+  getTaxReport(@Param('id') id: string) {
+    return this.payrollService.getTaxReport(id);
+  }
+
+  @Get('periods/:id/reports/insurance')
+  @ApiOperation({ summary: 'Báo cáo bảo hiểm' })
+  @ApiParam({ name: 'id', description: 'ID kỳ lương' })
+  getInsuranceReport(@Param('id') id: string) {
+    return this.payrollService.getInsuranceReport(id);
+  }
+}
+
+
+  // Reports
+  @Get('reports/department-summary/:periodId')
+  @ApiOperation({ summary: 'Báo cáo tổng hợp theo phòng ban' })
+  @ApiParam({ name: 'periodId', description: 'ID kỳ lương' })
+  getDepartmentSummary(@Param('periodId') periodId: string) {
+    return this.reportService.getDepartmentSummary(periodId);
+  }
+
+  @Get('reports/period-comparison')
+  @ApiOperation({ summary: 'Báo cáo so sánh giữa các kỳ' })
+  @ApiQuery({ name: 'fromYear', required: true })
+  @ApiQuery({ name: 'fromMonth', required: true })
+  @ApiQuery({ name: 'toYear', required: true })
+  @ApiQuery({ name: 'toMonth', required: true })
+  getPeriodComparison(
+    @Query('fromYear') fromYear: string,
+    @Query('fromMonth') fromMonth: string,
+    @Query('toYear') toYear: string,
+    @Query('toMonth') toMonth: string,
+  ) {
+    return this.reportService.getPeriodComparison(
+      parseInt(fromYear),
+      parseInt(fromMonth),
+      parseInt(toYear),
+      parseInt(toMonth),
+    );
+  }
+
+  @Get('reports/tax/:periodId')
+  @ApiOperation({ summary: 'Báo cáo chi tiết thuế TNCN' })
+  @ApiParam({ name: 'periodId', description: 'ID kỳ lương' })
+  getTaxReport(@Param('periodId') periodId: string) {
+    return this.reportService.getTaxReport(periodId);
+  }
+
+  @Get('reports/insurance/:periodId')
+  @ApiOperation({ summary: 'Báo cáo bảo hiểm' })
+  @ApiParam({ name: 'periodId', description: 'ID kỳ lương' })
+  getInsuranceReport(@Param('periodId') periodId: string) {
+    return this.reportService.getInsuranceReport(periodId);
+  }
+
+  // Accounting
+  @Post('accounting/generate/:periodId')
+  @ApiOperation({ summary: 'Tạo bút toán tự động' })
+  @ApiParam({ name: 'periodId', description: 'ID kỳ lương' })
+  generateAccounting(@Param('periodId') periodId: string) {
+    return this.accountingService.generateAccountingEntry(periodId);
+  }
+
+  @Get('accounting/:periodId')
+  @ApiOperation({ summary: 'Lấy bút toán của kỳ lương' })
+  @ApiParam({ name: 'periodId', description: 'ID kỳ lương' })
+  getAccounting(@Param('periodId') periodId: string) {
+    return this.accountingService.getAccountingEntry(periodId);
+  }
+
+  @Post('accounting/post/:entryId')
+  @ApiOperation({ summary: 'Đánh dấu đã hạch toán' })
+  @ApiParam({ name: 'entryId', description: 'ID bút toán' })
+  postAccounting(@Param('entryId') entryId: string, @Body() body: { userId: string }) {
+    return this.accountingService.postAccountingEntry(entryId, body.userId);
+  }
+
+  @Get('accounting/export/:entryId')
+  @ApiOperation({ summary: 'Xuất bút toán' })
+  @ApiParam({ name: 'entryId', description: 'ID bút toán' })
+  exportAccounting(@Param('entryId') entryId: string) {
+    return this.accountingService.exportAccountingEntry(entryId);
+  }
+
+  // Audit Logs
+  @Get('audit/:entityType/:entityId')
+  @ApiOperation({ summary: 'Lấy lịch sử thay đổi' })
+  getAuditLogs(@Param('entityType') entityType: string, @Param('entityId') entityId: string) {
+    return this.auditLogService.getEntityLogs(entityType, entityId);
+  }
+
+  // Import
+  @Post('import/timesheets')
+  @ApiOperation({ summary: 'Import chấm công từ CSV' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async importTimesheets(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { year: string; month: string },
+  ) {
+    // Parse CSV (simplified - in production use a proper CSV parser)
+    const content = file.buffer.toString();
+    const lines = content.split('\n').slice(1); // Skip header
+    const data = lines
+      .filter(line => line.trim())
+      .map(line => {
+        const [employeeCode, workDays, leaveDays, unpaidLeaveDays] = line.split(',');
+        return {
+          employeeCode: employeeCode.trim(),
+          workDays: parseFloat(workDays),
+          leaveDays: parseFloat(leaveDays),
+          unpaidLeaveDays: parseFloat(unpaidLeaveDays),
+        };
+      });
+
+    return this.importService.importTimesheets(parseInt(body.year), parseInt(body.month), data);
+  }
+
+  @Post('import/ot/:batchId')
+  @ApiOperation({ summary: 'Import OT từ CSV' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async importOt(@Param('batchId') batchId: string, @UploadedFile() file: Express.Multer.File) {
+    const content = file.buffer.toString();
+    const lines = content.split('\n').slice(1);
+    const data = lines
+      .filter(line => line.trim())
+      .map(line => {
+        const [employeeCode, date, otType, hours, note] = line.split(',');
+        return {
+          employeeCode: employeeCode.trim(),
+          date: date.trim(),
+          otType: otType.trim(),
+          hours: parseFloat(hours),
+          note: note?.trim(),
+        };
+      });
+
+    return this.importService.importOtRecords(batchId, data);
+  }
+}

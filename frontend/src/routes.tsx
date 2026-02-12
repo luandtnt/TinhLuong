@@ -24,6 +24,12 @@ import { RoleBasedRoute } from "./components/layout/RoleBasedRoute";
 import { ReviewListPage } from "./pages/reviews/ReviewListPage";
 import { ReviewDetailPage } from "./pages/reviews/ReviewDetailPage";
 import { ReportsPage } from "./pages/reports/ReportsPage";
+import { PayrollPeriodsPage } from "./pages/payroll/PayrollPeriodsPage";
+import { PayrollConfigsPage } from "./pages/payroll/PayrollConfigsPage";
+import { TimesheetsPage } from "./pages/payroll/TimesheetsPage";
+import { OtPage } from "./pages/payroll/OtPage";
+import { ClawbacksPage } from "./pages/payroll/ClawbacksPage";
+import { PayrollReportsPageNew } from "./pages/payroll/PayrollReportsPageNew";
 
 export const router = createBrowserRouter([
   {
@@ -127,6 +133,14 @@ export const router = createBrowserRouter([
       { path: "reviews", Component: ReviewListPage },
       { path: "reviews/:id", Component: ReviewDetailPage },
       { path: "reports", Component: ReportsPage },
+      
+      // Payroll routes
+      { path: "payroll/periods", Component: PayrollPeriodsPage },
+      { path: "payroll/timesheets", Component: TimesheetsPage },
+      { path: "payroll/ot", Component: OtPage },
+      { path: "payroll/clawbacks", Component: ClawbacksPage },
+      { path: "payroll/reports", Component: PayrollReportsPageNew },
+      { path: "payroll/configs", Component: PayrollConfigsPage },
     ],
   },
   {

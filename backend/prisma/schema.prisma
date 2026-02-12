@@ -1,0 +1,583 @@
+// Prisma Schema cho Hệ thống Quản lý Lương
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// DANH MỤC CƠ BẢN
+// ============================================
+
+// Đơn vị
+model Department {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  parentId  String?
+  parent    Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children  Department[] @relation("DepartmentHierarchy")
+  
+  employees Employee[]
+  documentNumbering DocumentNumbering[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("departments")
+}
+
+// Nhân viên
+model Employee {
+  id             String   @id @default(uuid())
+  code           String   @unique
+  fullName       String
+  email          String?
+  phone          String?
+  departmentId   String
+  department     Department @relation(fields: [departmentId], references: [id])
+  position       String?
+  joinDate       DateTime
+  status         EmployeeStatus @default(ACTIVE)
+  
+  // Thông tin lương cơ bản
+  baseSalary     Decimal  @db.Decimal(15, 2)
+  salaryCoefficient Decimal @db.Decimal(5, 2) @default(1.0) // Hệ số lương
+  kpiBonus       Decimal  @db.Decimal(15, 2) @default(0) // Thưởng KPI tháng
+  
+  timesheets     Timesheet[]
+  payrollDetails PayrollDetail[]
+  otRecords      OtRecord[]
+  clawbacks      Clawback[]
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("employees")
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  RESIGNED
+}
+
+// ============================================
+// CẤU HÌNH LƯƠNG
+// ============================================
+
+// Khoản lương/phụ cấp/khấu trừ
+model SalaryComponent {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  name              String
+  type              ComponentType
+  isTaxable         Boolean  @default(false)
+  isInsurable       Boolean  @default(false)
+  isFixedAmount     Boolean  @default(true) // true: số tiền cố định, false: tính theo ngày công
+  defaultAmount     Decimal  @db.Decimal(15, 2) @default(0) // Số tiền mặc định
+  accountingCode    String?
+  category          String?
+  subCategory       String?
+  effectiveDate     DateTime
+  expiryDate        DateTime?
+  isActive          Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("salary_components")
+}
+
+enum ComponentType {
+  SALARY          // Lương cơ bản
+  ALLOWANCE       // Phụ cấp
+  BONUS           // Thưởng
+  DEDUCTION       // Khấu trừ
+  OT_PAY          // Tiền OT
+}
+
+// Tỷ lệ BH/KPCĐ
+model InsuranceRate {
+  id                String   @id @default(uuid())
+  name              String
+  employeeRate      Decimal  @db.Decimal(5, 2) // % NLĐ đóng
+  employerRate      Decimal  @db.Decimal(5, 2) // % Đơn vị đóng
+  type              InsuranceType
+  effectiveDate     DateTime
+  expiryDate        DateTime?
+  isActive          Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("insurance_rates")
+}
+
+enum InsuranceType {
+  SOCIAL          // BHXH
+  HEALTH          // BHYT
+  UNEMPLOYMENT    // BHTN
+  UNION           // Công đoàn phí
+}
+
+// Quy tắc OT
+model OtRule {
+  id                String   @id @default(uuid())
+  name              String
+  otType            OtType
+  multiplier        Decimal  @db.Decimal(5, 2) // Hệ số nhân
+  effectiveDate     DateTime
+  expiryDate        DateTime?
+  isActive          Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("ot_rules")
+}
+
+enum OtType {
+  WEEKDAY         // Ngày thường
+  WEEKEND         // Cuối tuần
+  HOLIDAY         // Lễ tết
+  NIGHT_SHIFT     // Làm đêm
+  COMPENSATORY    // Nghỉ bù
+}
+
+// Thuế TNCN
+model TaxBracket {
+  id                String   @id @default(uuid())
+  fromAmount        Decimal  @db.Decimal(15, 2)
+  toAmount          Decimal? @db.Decimal(15, 2)
+  rate              Decimal  @db.Decimal(5, 2)
+  deduction         Decimal  @db.Decimal(15, 2) @default(0)
+  effectiveDate     DateTime
+  expiryDate        DateTime?
+  isActive          Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("tax_brackets")
+}
+
+// Giảm trừ gia cảnh
+model TaxDeduction {
+  id                String   @id @default(uuid())
+  name              String
+  amount            Decimal  @db.Decimal(15, 2)
+  type              TaxDeductionType
+  effectiveDate     DateTime
+  expiryDate        DateTime?
+  isActive          Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("tax_deductions")
+}
+
+enum TaxDeductionType {
+  SELF            // Bản thân
+  DEPENDENT       // Người phụ thuộc
+}
+
+// ============================================
+// KỲ LƯƠNG & SNAPSHOT
+// ============================================
+
+// Kỳ lương
+model PayrollPeriod {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  year              Int
+  month             Int
+  status            PayrollStatus @default(DRAFT)
+  
+  // Snapshot config khi chốt
+  snapshotConfig    Json?    // Lưu config áp dụng cho kỳ này
+  
+  payrollDetails    PayrollDetail[]
+  otBatches         OtBatch[]
+  clawbackBatches   ClawbackBatch[]
+  accountingEntries AccountingEntry[]
+  printLogs         PrintLog[]
+  
+  submittedAt       DateTime?
+  approvedAt        DateTime?
+  closedAt          DateTime?
+  accountedAt       DateTime?
+  paidAt            DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([year, month])
+  @@map("payroll_periods")
+}
+
+enum PayrollStatus {
+  DRAFT           // Nháp
+  PENDING         // Chờ duyệt
+  APPROVED        // Đã duyệt
+  CLOSED          // Đã chốt (khóa sửa)
+  ACCOUNTED       // Đã hạch toán
+  PAID            // Đã chi
+}
+
+// Chi tiết bảng lương
+model PayrollDetail {
+  id                String   @id @default(uuid())
+  periodId          String
+  period            PayrollPeriod @relation(fields: [periodId], references: [id])
+  employeeId        String
+  employee          Employee @relation(fields: [employeeId], references: [id])
+  
+  // Lương cơ bản
+  baseSalary        Decimal  @db.Decimal(15, 2)
+  salaryCoefficient Decimal  @db.Decimal(5, 2) @default(1.0)
+  
+  // Ngày công
+  standardWorkDays  Decimal  @db.Decimal(5, 2) @default(22) // Ngày công chuẩn
+  actualWorkDays    Decimal  @db.Decimal(5, 2) @default(0) // Ngày công thực tế
+  paidLeaveDays     Decimal  @db.Decimal(5, 2) @default(0) // Nghỉ phép có lương
+  unpaidLeaveDays   Decimal  @db.Decimal(5, 2) @default(0) // Nghỉ không lương
+  
+  // Lương & phụ cấp
+  actualSalary      Decimal  @db.Decimal(15, 2) @default(0) // Lương thực tế theo ngày công
+  allowances        Json     // { "code": amount }
+  bonuses           Json     // { "code": amount }
+  kpiBonus          Decimal  @db.Decimal(15, 2) @default(0) // Thưởng KPI
+  
+  // OT
+  otAmount          Decimal  @db.Decimal(15, 2) @default(0)
+  
+  // Khấu trừ
+  deductions        Json     // { "code": amount }
+  
+  // Truy thu
+  clawbackAmount    Decimal  @db.Decimal(15, 2) @default(0)
+  
+  // Bảo hiểm
+  socialInsurance   Decimal  @db.Decimal(15, 2) @default(0)
+  healthInsurance   Decimal  @db.Decimal(15, 2) @default(0)
+  unemploymentIns   Decimal  @db.Decimal(15, 2) @default(0)
+  unionFee          Decimal  @db.Decimal(15, 2) @default(0)
+  
+  // Thuế
+  taxableIncome     Decimal  @db.Decimal(15, 2) @default(0)
+  taxDeductions     Decimal  @db.Decimal(15, 2) @default(0)
+  personalIncomeTax Decimal  @db.Decimal(15, 2) @default(0)
+  
+  // Tổng
+  grossSalary       Decimal  @db.Decimal(15, 2)
+  netSalary         Decimal  @db.Decimal(15, 2)
+  
+  // Ghi chú
+  note              String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([periodId, employeeId])
+  @@map("payroll_details")
+}
+
+// ============================================
+// CHẤM CÔNG
+// ============================================
+
+model Timesheet {
+  id                String   @id @default(uuid())
+  employeeId        String
+  employee          Employee @relation(fields: [employeeId], references: [id])
+  year              Int
+  month             Int
+  
+  workDays          Decimal  @db.Decimal(5, 2) @default(0)
+  leaveDays         Decimal  @db.Decimal(5, 2) @default(0)
+  unpaidLeaveDays   Decimal  @db.Decimal(5, 2) @default(0)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([employeeId, year, month])
+  @@map("timesheets")
+}
+
+// ============================================
+// OT (LÀM THÊM GIỜ)
+// ============================================
+
+// Batch OT
+model OtBatch {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  periodId          String
+  period            PayrollPeriod @relation(fields: [periodId], references: [id])
+  name              String
+  status            OtBatchStatus @default(DRAFT)
+  
+  otRecords         OtRecord[]
+  
+  totalAmount       Decimal  @db.Decimal(15, 2) @default(0)
+  
+  submittedAt       DateTime?
+  approvedAt        DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("ot_batches")
+}
+
+enum OtBatchStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+// Chi tiết OT
+model OtRecord {
+  id                String   @id @default(uuid())
+  batchId           String
+  batch             OtBatch  @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  employeeId        String
+  employee          Employee @relation(fields: [employeeId], references: [id])
+  
+  date              DateTime
+  otType            OtType
+  hours             Decimal  @db.Decimal(5, 2)
+  hourlyRate        Decimal  @db.Decimal(15, 2)
+  multiplier        Decimal  @db.Decimal(5, 2)
+  amount            Decimal  @db.Decimal(15, 2)
+  
+  note              String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("ot_records")
+}
+
+// ============================================
+// TRUY THU LƯƠNG
+// ============================================
+
+// Batch truy thu
+model ClawbackBatch {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  name              String
+  deductPeriodId    String   // Kỳ bị trừ
+  deductPeriod      PayrollPeriod @relation(fields: [deductPeriodId], references: [id])
+  
+  status            ClawbackStatus @default(DRAFT)
+  
+  clawbacks         Clawback[]
+  
+  totalAmount       Decimal  @db.Decimal(15, 2) @default(0)
+  
+  submittedAt       DateTime?
+  approvedAt        DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("clawback_batches")
+}
+
+enum ClawbackStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+// Chi tiết truy thu
+model Clawback {
+  id                String   @id @default(uuid())
+  batchId           String
+  batch             ClawbackBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  employeeId        String
+  employee          Employee @relation(fields: [employeeId], references: [id])
+  
+  clawbackType      ClawbackType
+  originalYear      Int      // Kỳ gốc
+  originalMonth     Int
+  
+  amount            Decimal  @db.Decimal(15, 2)
+  reason            String
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("clawbacks")
+}
+
+enum ClawbackType {
+  SALARY_REDUCTION     // Giảm lương
+  ALLOWANCE_REDUCTION  // Giảm phụ cấp
+  OVERPAYMENT         // Trả thừa
+  OTHER               // Khác
+}
+
+// ============================================
+// AUDIT LOG
+// ============================================
+
+model AuditLog {
+  id                String   @id @default(uuid())
+  entityType        String   // PayrollPeriod, PayrollDetail, etc.
+  entityId          String
+  action            String   // CREATE, UPDATE, DELETE, CALCULATE, SUBMIT, APPROVE, CLOSE
+  userId            String?  // ID người thực hiện
+  userName          String?  // Tên người thực hiện
+  changes           Json?    // Chi tiết thay đổi
+  metadata          Json?    // Thông tin bổ sung
+  ipAddress         String?
+  userAgent         String?
+  
+  createdAt         DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+
+// ============================================
+// AUDIT LOG (đã có sẵn ở trên)
+// ============================================
+
+
+// ============================================
+// ACCOUNTING ENTRIES (Hạch toán)
+// ============================================
+
+model AccountingEntry {
+  id              String   @id @default(uuid())
+  periodId        String
+  period          PayrollPeriod @relation(fields: [periodId], references: [id])
+  entryDate       DateTime
+  description     String
+  totalDebit      Decimal  @db.Decimal(15, 2)
+  totalCredit     Decimal  @db.Decimal(15, 2)
+  status          String   @default("DRAFT") // DRAFT, POSTED
+  postedAt        DateTime?
+  postedBy        String?
+  
+  details         AccountingDetail[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("accounting_entries")
+}
+
+model AccountingDetail {
+  id              String   @id @default(uuid())
+  entryId         String
+  entry           AccountingEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  accountCode     String   // Mã tài khoản
+  accountName     String   // Tên tài khoản
+  debit           Decimal  @db.Decimal(15, 2) @default(0)
+  credit          Decimal  @db.Decimal(15, 2) @default(0)
+  description     String?
+  departmentId    String?
+  employeeId      String?
+  
+  createdAt       DateTime @default(now())
+
+  @@map("accounting_details")
+}
+
+// ============================================
+// EMAIL QUEUE (Hàng đợi gửi email)
+// ============================================
+
+model EmailQueue {
+  id          String   @id @default(uuid())
+  to          String
+  subject     String
+  body        String   @db.Text
+  attachments Json?    // Array of attachment info
+  status      String   @default("PENDING") // PENDING, SENT, FAILED
+  attempts    Int      @default(0)
+  lastError   String?  @db.Text
+  sentAt      DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@map("email_queue")
+}
+
+// ============================================
+// PRINT TEMPLATES & DOCUMENT MANAGEMENT
+// ============================================
+
+model PrintTemplate {
+  id              String   @id @default(uuid())
+  code            String   @unique // C01-TS, C02-TS, D02-TS
+  name            String
+  description     String?
+  templateType    String   // PAYROLL_SUMMARY, OT_SUMMARY, INSURANCE, PAYSLIP, PAYMENT_REQUEST
+  htmlTemplate    String   @db.Text
+  headerTemplate  String?  @db.Text
+  footerTemplate  String?  @db.Text
+  paperSize       String   @default("A4") // A4, A3, LETTER
+  orientation     String   @default("portrait") // portrait, landscape
+  isActive        Boolean  @default(true)
+  isDefault       Boolean  @default(false)
+  metadata        Json?    // Custom fields: signatures, company info, etc
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  printLogs       PrintLog[]
+
+  @@map("print_templates")
+}
+
+model PrintLog {
+  id              String   @id @default(uuid())
+  templateId      String
+  template        PrintTemplate @relation(fields: [templateId], references: [id])
+  periodId        String?
+  period          PayrollPeriod? @relation(fields: [periodId], references: [id])
+  documentNumber  String?  // Số chứng từ: BL001/2025
+  documentDate    DateTime?
+  printedBy       String
+  printedAt       DateTime @default(now())
+  fileUrl         String?  // URL to generated PDF in storage
+  metadata        Json?    // Data snapshot used for printing
+  
+  @@index([periodId])
+  @@index([printedAt])
+  @@map("print_logs")
+}
+
+model DocumentNumbering {
+  id              String   @id @default(uuid())
+  prefix          String   // BL (Bảng lương), OT, BH (Bảo hiểm), DN (Đề nghị)
+  year            Int
+  sequence        Int      @default(0)
+  lastNumber      String?  // BL001/2025
+  documentType    String   // PAYROLL, OT, INSURANCE, PAYMENT_REQUEST
+  departmentId    String?
+  department      Department? @relation(fields: [departmentId], references: [id])
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([prefix, year, documentType])
+  @@map("document_numbering")
+}
