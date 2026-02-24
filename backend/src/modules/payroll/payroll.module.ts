@@ -6,6 +6,8 @@ import { PayrollReportService } from './payroll-report.service';
 import { AuditLogService } from './audit-log.service';
 import { TemplateService } from './template.service';
 import { PrintService } from './print.service';
+import { PaymentService } from './payment.service';
+import { ObligationService } from './obligation.service';
 import { PrismaModule } from '../../prisma/prisma.module';
 
 @Module({
@@ -18,6 +20,8 @@ import { PrismaModule } from '../../prisma/prisma.module';
     AuditLogService,
     TemplateService,
     PrintService,
+    PaymentService,
+    ObligationService,
   ],
   exports: [
     PayrollService,
@@ -26,6 +30,8 @@ import { PrismaModule } from '../../prisma/prisma.module';
     AuditLogService,
     TemplateService,
     PrintService,
+    PaymentService,
+    ObligationService,
   ],
 })
 export class PayrollModule {}

@@ -9,6 +9,7 @@ import { EyeIcon } from '../../components/icons/table-actions/EyeIcon';
 import { EditIcon } from '../../components/icons/table-actions/EditIcon';
 import { PayrollDetailModal } from '../../components/payroll/PayrollDetailModal';
 import { AdjustPayrollModal, PayrollAdjustment } from '../../components/payroll/AdjustPayrollModal';
+import { CreatePayrollPeriodModal } from '../../components/payroll/CreatePayrollPeriodModal';
 import api from '../../lib/api';
 import { PayrollPeriod, PayrollDetail } from '../../types/payroll';
 
@@ -21,6 +22,7 @@ export function PayrollPeriodsPage() {
   const [selectedDetail, setSelectedDetail] = useState<PayrollDetail | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -527,6 +529,10 @@ export function PayrollPeriodsPage() {
             onSave={handleSaveAdjustment}
           />
         )}
+
+        {showCreateModal && (
+          <CreatePayrollPeriodModal onClose={() => setShowCreateModal(false)} />
+        )}
       </>
     );
   }
@@ -549,7 +555,7 @@ export function PayrollPeriodsPage() {
               size="md"
             />
             <Button
-              onClick={() => alert('Tạo kỳ mới')}
+              onClick={() => setShowCreateModal(true)}
               icon={<Plus size={18} />}
               label="Tạo kỳ mới"
               variant="primary"
@@ -617,6 +623,11 @@ export function PayrollPeriodsPage() {
           />
         </div>
       </div>
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <CreatePayrollPeriodModal onClose={() => setShowCreateModal(false)} />
+      )}
     </div>
   );
 }

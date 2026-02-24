@@ -43,6 +43,8 @@ export function SubordinateSidebar({ onClose }: SubordinateSidebarProps) {
   const payrollLinks = [
     { path: '/dashboard/payroll/timesheets', label: 'Tổng hợp chấm công - nghỉ - OT' },
     { path: '/dashboard/payroll/periods', label: 'Tính lương' },
+    { path: '/dashboard/payroll/payments', label: 'Thanh toán / Trả lương' },
+    { path: '/dashboard/payroll/obligations', label: 'Nộp BH / KPCĐ / Thuế' },
     { path: '/dashboard/payroll/ot', label: 'OT/Làm thêm giờ - làm đêm' },
     { path: '/dashboard/payroll/clawbacks', label: 'Truy thu lương' },
     { path: '/dashboard/payroll/reports', label: 'Báo cáo lương' },

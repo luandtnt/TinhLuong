@@ -17,6 +17,36 @@ export class PayrollService {
     });
   }
 
+  async createPeriod(dto: { code: string; year: number; month: number }) {
+    // Check if period already exists
+    const existing = await this.prisma.payrollPeriod.findUnique({
+      where: { year_month: { year: dto.year, month: dto.month } },
+    });
+
+    if (existing) {
+      throw new Error('Kỳ lương này đã tồn tại');
+    }
+
+    const period = await this.prisma.payrollPeriod.create({
+      data: {
+        code: dto.code,
+        year: dto.year,
+        month: dto.month,
+        status: 'DRAFT',
+      },
+    });
+
+    await this.auditLog.log({
+      entityType: 'PayrollPeriod',
+      entityId: period.id,
+      action: 'CREATE',
+      userName: 'System',
+      metadata: { year: dto.year, month: dto.month },
+    });
+
+    return period;
+  }
+
   async getPayrollDetails(periodId: string) {
     return this.prisma.payrollDetail.findMany({
       where: { periodId },

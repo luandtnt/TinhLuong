@@ -5,6 +5,8 @@ import { PayrollService } from './payroll.service';
 import { PayrollReportService } from './payroll-report.service';
 import { TemplateService } from './template.service';
 import { PrintService } from './print.service';
+import { PaymentService } from './payment.service';
+import { ObligationService } from './obligation.service';
 
 @ApiTags('payroll')
 @Controller('payroll')
@@ -14,12 +16,20 @@ export class PayrollController {
     private readonly reportService: PayrollReportService,
     private readonly templateService: TemplateService,
     private readonly printService: PrintService,
+    private readonly paymentService: PaymentService,
+    private readonly obligationService: ObligationService,
   ) {}
 
   @Get('periods')
   @ApiOperation({ summary: 'Lấy danh sách kỳ lương' })
   findAllPeriods() {
     return this.payrollService.findAllPeriods();
+  }
+
+  @Post('periods')
+  @ApiOperation({ summary: 'Tạo kỳ lương mới' })
+  createPeriod(@Body() dto: { code: string; year: number; month: number }) {
+    return this.payrollService.createPeriod(dto);
   }
 
   @Get('periods/:id/details')
@@ -165,5 +175,155 @@ export class PayrollController {
   @ApiQuery({ name: 'periodId', required: false })
   getPrintHistory(@Query('periodId') periodId?: string) {
     return this.templateService.getPrintHistory(periodId);
+  }
+
+  // ============================================
+  // PAYMENT ENDPOINTS (Module 5)
+  // ============================================
+
+  @Post('payments/batches')
+  @ApiOperation({ summary: 'Tạo đợt thanh toán lương' })
+  createPaymentBatch(
+    @Body()
+    dto: {
+      periodId: string;
+      name: string;
+      paymentMethod: string;
+      bankCode?: string;
+      bankName?: string;
+      note?: string;
+    },
+  ) {
+    return this.paymentService.createPaymentBatch(dto as any);
+  }
+
+  @Get('payments/batches')
+  @ApiOperation({ summary: 'Lấy danh sách đợt thanh toán' })
+  @ApiQuery({ name: 'periodId', required: false })
+  getPaymentBatches(@Query('periodId') periodId?: string) {
+    return this.paymentService.findAllBatches(periodId);
+  }
+
+  @Get('payments/batches/:id')
+  @ApiOperation({ summary: 'Lấy chi tiết đợt thanh toán' })
+  @ApiParam({ name: 'id', description: 'ID đợt thanh toán' })
+  getPaymentBatchDetails(@Param('id') id: string) {
+    return this.paymentService.getBatchDetails(id);
+  }
+
+  @Post('payments/batches/:id/submit')
+  @ApiOperation({ summary: 'Nộp duyệt đợt thanh toán' })
+  @ApiParam({ name: 'id', description: 'ID đợt thanh toán' })
+  submitPaymentBatch(@Param('id') id: string) {
+    return this.paymentService.submitBatch(id);
+  }
+
+  @Post('payments/batches/:id/approve')
+  @ApiOperation({ summary: 'Phê duyệt đợt thanh toán' })
+  @ApiParam({ name: 'id', description: 'ID đợt thanh toán' })
+  approvePaymentBatch(@Param('id') id: string) {
+    return this.paymentService.approveBatch(id);
+  }
+
+  @Post('payments/batches/:id/confirm-paid')
+  @ApiOperation({ summary: 'Xác nhận đã chi' })
+  @ApiParam({ name: 'id', description: 'ID đợt thanh toán' })
+  confirmPaymentPaid(@Param('id') id: string) {
+    return this.paymentService.confirmPaid(id);
+  }
+
+  @Post('payments/batches/:id/cancel')
+  @ApiOperation({ summary: 'Hủy đợt thanh toán' })
+  @ApiParam({ name: 'id', description: 'ID đợt thanh toán' })
+  cancelPaymentBatch(@Param('id') id: string) {
+    return this.paymentService.cancelBatch(id);
+  }
+
+  @Get('payments/batches/:id/export')
+  @ApiOperation({ summary: 'Export danh sách chi trả' })
+  @ApiParam({ name: 'id', description: 'ID đợt thanh toán' })
+  exportPaymentList(@Param('id') id: string) {
+    return this.paymentService.exportPaymentList(id);
+  }
+
+  // ============================================
+  // OBLIGATION ENDPOINTS (Module 6)
+  // ============================================
+
+  @Post('obligations/batches')
+  @ApiOperation({ summary: 'Tạo đợt nộp nghĩa vụ (BH/KPCĐ/Thuế)' })
+  createObligationBatch(
+    @Body()
+    dto: {
+      periodId: string;
+      obligationType: string;
+      name: string;
+      paymentMethod?: string;
+      bankAccount?: string;
+      bankName?: string;
+      note?: string;
+    },
+  ) {
+    return this.obligationService.createObligationBatch(dto as any);
+  }
+
+  @Get('obligations/batches')
+  @ApiOperation({ summary: 'Lấy danh sách đợt nộp nghĩa vụ' })
+  @ApiQuery({ name: 'periodId', required: false })
+  @ApiQuery({ name: 'obligationType', required: false })
+  getObligationBatches(
+    @Query('periodId') periodId?: string,
+    @Query('obligationType') obligationType?: string,
+  ) {
+    return this.obligationService.findAllBatches(periodId, obligationType as any);
+  }
+
+  @Get('obligations/batches/:id')
+  @ApiOperation({ summary: 'Lấy chi tiết đợt nộp nghĩa vụ' })
+  @ApiParam({ name: 'id', description: 'ID đợt nộp' })
+  getObligationBatchDetails(@Param('id') id: string) {
+    return this.obligationService.getBatchDetails(id);
+  }
+
+  @Post('obligations/batches/:id/submit')
+  @ApiOperation({ summary: 'Nộp duyệt đợt nộp nghĩa vụ' })
+  @ApiParam({ name: 'id', description: 'ID đợt nộp' })
+  submitObligationBatch(@Param('id') id: string) {
+    return this.obligationService.submitBatch(id);
+  }
+
+  @Post('obligations/batches/:id/approve')
+  @ApiOperation({ summary: 'Phê duyệt đợt nộp nghĩa vụ' })
+  @ApiParam({ name: 'id', description: 'ID đợt nộp' })
+  approveObligationBatch(@Param('id') id: string) {
+    return this.obligationService.approveBatch(id);
+  }
+
+  @Post('obligations/batches/:id/confirm-paid')
+  @ApiOperation({ summary: 'Xác nhận đã nộp' })
+  @ApiParam({ name: 'id', description: 'ID đợt nộp' })
+  confirmObligationPaid(
+    @Param('id') id: string,
+    @Body() dto: { voucherNumber?: string; voucherDate?: string },
+  ) {
+    return this.obligationService.confirmPaid(
+      id,
+      dto.voucherNumber,
+      dto.voucherDate ? new Date(dto.voucherDate) : undefined,
+    );
+  }
+
+  @Post('obligations/batches/:id/cancel')
+  @ApiOperation({ summary: 'Hủy đợt nộp nghĩa vụ' })
+  @ApiParam({ name: 'id', description: 'ID đợt nộp' })
+  cancelObligationBatch(@Param('id') id: string) {
+    return this.obligationService.cancelBatch(id);
+  }
+
+  @Get('obligations/batches/:id/export')
+  @ApiOperation({ summary: 'Export danh sách nộp nghĩa vụ' })
+  @ApiParam({ name: 'id', description: 'ID đợt nộp' })
+  exportObligationList(@Param('id') id: string) {
+    return this.obligationService.exportObligationList(id);
   }
 }

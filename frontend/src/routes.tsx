@@ -30,6 +30,8 @@ import { TimesheetsPage } from "./pages/payroll/TimesheetsPage";
 import { OtPage } from "./pages/payroll/OtPage";
 import { ClawbacksPage } from "./pages/payroll/ClawbacksPage";
 import { PayrollReportsPageNew } from "./pages/payroll/PayrollReportsPageNew";
+import { PaymentPage } from "./pages/payroll/PaymentPage";
+import { ObligationPage } from "./pages/payroll/ObligationPage";
 
 export const router = createBrowserRouter([
   {
@@ -141,6 +143,8 @@ export const router = createBrowserRouter([
       { path: "payroll/clawbacks", Component: ClawbacksPage },
       { path: "payroll/reports", Component: PayrollReportsPageNew },
       { path: "payroll/configs", Component: PayrollConfigsPage },
+      { path: "payroll/payments", Component: PaymentPage },
+      { path: "payroll/obligations", Component: ObligationPage },
     ],
   },
   {

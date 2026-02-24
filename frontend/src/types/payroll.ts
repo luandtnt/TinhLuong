@@ -169,6 +169,8 @@ export interface CalculationResult {
 // Timesheet
 export interface Timesheet {
   id: string;
+  batchId?: string;
+  batch?: TimesheetBatch;
   employeeId: string;
   employee?: Employee;
   year: number;
@@ -176,6 +178,21 @@ export interface Timesheet {
   workDays: number;
   leaveDays: number;
   unpaidLeaveDays: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Timesheet Batch
+export interface TimesheetBatch {
+  id: string;
+  code: string;
+  name: string;
+  year: number;
+  month: number;
+  status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+  submittedAt?: string;
+  approvedAt?: string;
+  timesheets?: Timesheet[];
   createdAt: string;
   updatedAt: string;
 }

@@ -207,6 +207,7 @@ model PayrollPeriod {
   clawbackBatches   ClawbackBatch[]
   accountingEntries AccountingEntry[]
   printLogs         PrintLog[]
+  paymentBatches    PaymentBatch[]
   
   submittedAt       DateTime?
   approvedAt        DateTime?
@@ -293,9 +294,11 @@ model PayrollDetail {
 // ============================================
 
 model Timesheet {
-  id                String   @id @default(uuid())
+  id                String          @id @default(uuid())
+  batchId           String?
+  batch             TimesheetBatch? @relation(fields: [batchId], references: [id])
   employeeId        String
-  employee          Employee @relation(fields: [employeeId], references: [id])
+  employee          Employee        @relation(fields: [employeeId], references: [id])
   year              Int
   month             Int
   
@@ -307,7 +310,25 @@ model Timesheet {
   updatedAt         DateTime @updatedAt
 
   @@unique([employeeId, year, month])
+  @@index([batchId])
   @@map("timesheets")
+}
+
+model TimesheetBatch {
+  id          String          @id @default(uuid())
+  code        String          @unique
+  name        String
+  year        Int
+  month       Int
+  status      OtBatchStatus   @default(DRAFT)
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  timesheets  Timesheet[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([year, month])
+  @@map("timesheet_batches")
 }
 
 // ============================================
@@ -580,4 +601,185 @@ model DocumentNumbering {
   
   @@unique([prefix, year, documentType])
   @@map("document_numbering")
+}
+
+// ============================================
+// MODULE 5: THANH TOÁN/TRẢ LƯƠNG
+// ============================================
+
+model PaymentBatch {
+  id              String   @id @default(uuid())
+  code            String   @unique // TL001/2025
+  periodId        String
+  period          PayrollPeriod @relation(fields: [periodId], references: [id])
+  name            String   // Tên đợt thanh toán
+  paymentMethod   PaymentMethod
+  status          PaymentStatus @default(DRAFT)
+  
+  // Thông tin ngân hàng (nếu chuyển khoản)
+  bankCode        String?
+  bankName        String?
+  
+  // Tổng tiền
+  totalAmount     Decimal  @db.Decimal(15, 2) @default(0)
+  totalEmployees  Int      @default(0)
+  
+  // Thông tin phê duyệt
+  preparedBy      String?
+  reviewedBy      String?
+  approvedBy      String?
+  
+  payments        Payment[]
+  
+  submittedAt     DateTime?
+  approvedAt      DateTime?
+  paidAt          DateTime?
+  
+  note            String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("payment_batches")
+}
+
+enum PaymentMethod {
+  CASH            // Tiền mặt
+  BANK_TRANSFER   // Chuyển khoản
+  ATM_CARD        // Qua thẻ ATM
+  TREASURY        // Rút dự toán Kho bạc
+}
+
+enum PaymentStatus {
+  DRAFT           // Nháp
+  PENDING         // Chờ duyệt
+  APPROVED        // Đã duyệt
+  PAID            // Đã chi
+  CANCELLED       // Đã hủy
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  batchId         String
+  batch           PaymentBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  employeeId      String
+  payrollDetailId String   // Link to PayrollDetail
+  
+  // Thông tin nhân viên (snapshot)
+  employeeCode    String
+  employeeName    String
+  departmentName  String?
+  
+  // Số tiền
+  amount          Decimal  @db.Decimal(15, 2)
+  
+  // Thông tin ngân hàng (nếu chuyển khoản)
+  bankAccount     String?
+  bankName        String?
+  
+  // Trạng thái
+  status          PaymentStatus @default(DRAFT)
+  paidAt          DateTime?
+  
+  // Chứng từ
+  voucherNumber   String?
+  voucherDate     DateTime?
+  
+  note            String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([batchId])
+  @@index([employeeId])
+  @@map("payments")
+}
+
+// ============================================
+// MODULE 6: NGHĨA VỤ SAU LƯƠNG
+// ============================================
+
+model ObligationBatch {
+  id              String   @id @default(uuid())
+  code            String   @unique // BH001/2025, KPCD001/2025, THUE001/2025
+  periodId        String
+  obligationType  ObligationType
+  name            String
+  status          ObligationStatus @default(DRAFT)
+  
+  // Số tiền
+  totalAmount     Decimal  @db.Decimal(15, 2) @default(0)
+  employeeAmount  Decimal  @db.Decimal(15, 2) @default(0) // Phần NLĐ đóng
+  employerAmount  Decimal  @db.Decimal(15, 2) @default(0) // Phần đơn vị đóng
+  
+  // Thông tin nộp
+  paymentMethod   String?  // BANK_TRANSFER, CASH
+  bankAccount     String?
+  bankName        String?
+  
+  // Chứng từ
+  voucherNumber   String?
+  voucherDate     DateTime?
+  
+  obligations     Obligation[]
+  
+  submittedAt     DateTime?
+  approvedAt      DateTime?
+  paidAt          DateTime?
+  
+  note            String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("obligation_batches")
+}
+
+enum ObligationType {
+  SOCIAL_INSURANCE      // BHXH
+  HEALTH_INSURANCE      // BHYT
+  UNEMPLOYMENT_INS      // BHTN
+  UNION_FEE            // Công đoàn phí
+  PERSONAL_INCOME_TAX  // Thuế TNCN
+}
+
+enum ObligationStatus {
+  DRAFT           // Nháp
+  PENDING         // Chờ duyệt
+  APPROVED        // Đã duyệt
+  PAID            // Đã nộp
+  CANCELLED       // Đã hủy
+}
+
+model Obligation {
+  id              String   @id @default(uuid())
+  batchId         String
+  batch           ObligationBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  employeeId      String
+  payrollDetailId String
+  
+  // Thông tin nhân viên (snapshot)
+  employeeCode    String
+  employeeName    String
+  departmentName  String?
+  
+  // Số tiền
+  employeeAmount  Decimal  @db.Decimal(15, 2) @default(0) // Phần NLĐ
+  employerAmount  Decimal  @db.Decimal(15, 2) @default(0) // Phần đơn vị
+  totalAmount     Decimal  @db.Decimal(15, 2) @default(0) // Tổng
+  
+  // Cơ sở tính (cho BH)
+  insuranceBase   Decimal? @db.Decimal(15, 2)
+  
+  // Thu nhập chịu thuế (cho thuế TNCN)
+  taxableIncome   Decimal? @db.Decimal(15, 2)
+  
+  note            String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([batchId])
+  @@index([employeeId])
+  @@map("obligations")
 }
